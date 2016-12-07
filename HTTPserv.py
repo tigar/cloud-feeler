@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 
 '''
-currently running in python 2.7, will swap libraries
-to make compatible with 3.5 (easy fix)
+Adam Tigar and Meg Crenshaw
+Threaded HTTP Server to handle GET/POST requests from a sensor
 
 '''
 
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-import SocketServer
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import socketserver
 from sys import argv
+
+class ThreadingSimpleServer(ThreadingMixIn, HTTPServer):
+    pass
 
 class S(BaseHTTPRequestHandler):
     def _set_headers(self):
@@ -24,26 +27,23 @@ class S(BaseHTTPRequestHandler):
         self._set_headers()
         
     def do_POST(self):
-        # Doesn't do anything with posted data currently
+        content_length = int(self.headers['Content-Length']) # Gets the size of data
+        post_data = self.rfile.read(content_length) # Gets the data itself
         self._set_headers()
-        self.wfile.write("<html><body><h1>POST!</h1></body></html>")
+        self.wfile.write("<html><body><h1>POST!</h1><pre>" + post_data + "</pre></body></html>")
         
-def run(server_class=HTTPServer, handler_class=S, port=8080):
+def run(server_class=ThreadingSimpleServer, handler_class=S, port=8080):
     server_address = ('localhost', port)
     httpd = server_class(server_address, handler_class)
     print 'Starting http server on %s..'
     httpd.serve_forever()
 
-def do_POST(self):
-        # Doesn't do anything with posted data yet
-        content_length = int(self.headers['Content-Length']) # Gets the size of data
-        post_data = self.rfile.read(content_length) #Gets the data itself
-        self._set_headers()
-        self.wfile.write("<html><body><h1>POST!</h1></body></html>")
-
 if __name__ == "__main__":
     if len(argv) == 2:
         run(port=int(argv[1]))
+        do_POST()
     else:
         run()
         do_POST()
+
+
