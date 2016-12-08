@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+
+'''
+Adam Tigar and Meg Crenshaw
+Sensor to send activity to server, read response,
+and delete malicious files
+'''
+
 import sys
 import time
 import logging

@@ -7,10 +7,11 @@ Threaded HTTP Server to handle GET/POST requests from a sensor
 '''
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import threading
 import socketserver
 from sys import argv
 
-class ThreadingSimpleServer(ThreadingMixIn, HTTPServer):
+class ThreadingSimpleServer(socketserver.ThreadingMixIn, HTTPServer):
     pass
 
 class S(BaseHTTPRequestHandler):
@@ -25,17 +26,17 @@ class S(BaseHTTPRequestHandler):
 
     def do_HEAD(self):
         self._set_headers()
-        
+
     def do_POST(self):
         content_length = int(self.headers['Content-Length']) # Gets the size of data
         post_data = self.rfile.read(content_length) # Gets the data itself
         self._set_headers()
         self.wfile.write("<html><body><h1>POST!</h1><pre>" + post_data + "</pre></body></html>")
-        
+
 def run(server_class=ThreadingSimpleServer, handler_class=S, port=8080):
     server_address = ('localhost', port)
     httpd = server_class(server_address, handler_class)
-    print 'Starting http server on %s..'
+    print('Starting http server on %s..' %port)
     httpd.serve_forever()
 
 if __name__ == "__main__":
@@ -45,5 +46,3 @@ if __name__ == "__main__":
     else:
         run()
         do_POST()
-
-
