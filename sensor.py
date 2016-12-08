@@ -13,23 +13,31 @@ from pathlib import Path
 from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler
 from watchdog.events import FileSystemEventHandler
+import http.client
 
-maliciousFile = Path('evilFile')
+maliciousFileString = 'evilFile'
 
 class MyHandler(FileSystemEventHandler):
     def on_modified(self, event):
         what = 'directory' if event.is_directory else 'file'
         logging.info("Modified %s: %s", what, event.src_path)
+        conn = http.client.HTTPConnection("localhost:8081")
+        req = conn.request("POST", "/", "modified")
+        resp = conn.getresponse()
+        print(resp.status)
 
     def on_created(self, event):
         what = 'directory' if event.is_directory else 'file'
         logging.info("Created %s: %s", what, event.src_path)
+        conn = http.client.HTTPConnection("localhost:8081")
+        req = conn.request("POST", "/", "created")
+        resp = conn.getresponse()
+        print(resp.status)
 
-def startLogging():
+def startLogging(path):
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S')
-    path = sys.argv[1] if len(sys.argv) > 1 else '.'
     event_object = FileSystemEventHandler()
     event_handler = MyHandler()
     observer = Observer()
@@ -38,7 +46,7 @@ def startLogging():
     try:
         while True:
             time.sleep(1)
-            if not maliciousFile.exists():
+            if not Path(path+maliciousFileString).exists():
                 observer.stop()
                 break
     except KeyboardInterrupt:
@@ -48,11 +56,12 @@ def startLogging():
     return 0
 
 if __name__ == "__main__":
+    path = sys.argv[1] if len(sys.argv) > 1 else '.'
     try:
         while True:
             time.sleep(1)
-            if maliciousFile.exists():
-                if startLogging() == 1:
+            if Path(path+maliciousFileString).exists():
+                if startLogging(path) == 1:
                     break
     except KeyboardInterrupt:
         pass

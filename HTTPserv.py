@@ -3,7 +3,6 @@
 '''
 Adam Tigar and Meg Crenshaw
 Threaded HTTP Server to handle GET/POST requests from a sensor
-
 '''
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -14,26 +13,25 @@ from sys import argv
 class ThreadingSimpleServer(socketserver.ThreadingMixIn, HTTPServer):
     pass
 
-class S(BaseHTTPRequestHandler):
-    def _set_headers(self):
+class ServerRequestHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
+        self.wfile.write(bytes("<html><body><h1>Initial response</h1></body></html>", "utf8"))
         self.end_headers()
 
-    def do_GET(self):
-        self._set_headers()
-        self.wfile.write("<html><body><h1>Initial response</h1></body></html>")
-
     def do_HEAD(self):
-        self._set_headers()
+        self.send_response(202)
+        self.end_headers()
 
     def do_POST(self):
-        content_length = int(self.headers['Content-Length']) # Gets the size of data
-        post_data = self.rfile.read(content_length) # Gets the data itself
-        self._set_headers()
-        self.wfile.write("<html><body><h1>POST!</h1><pre>" + post_data + "</pre></body></html>")
+        length = int(self.headers['Content-Length'])
+        post_data = self.rfile.read(length)
+        print(post_data)
+        self.send_response(201)
+        self.end_headers()
 
-def run(server_class=ThreadingSimpleServer, handler_class=S, port=8080):
+def run(server_class=ThreadingSimpleServer, handler_class=ServerRequestHandler, port=8080):
     server_address = ('localhost', port)
     httpd = server_class(server_address, handler_class)
     print('Starting http server on %s..' %port)
