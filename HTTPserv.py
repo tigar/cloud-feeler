@@ -10,10 +10,13 @@ import threading
 import socketserver
 from sys import argv
 
+# Creates threads for each connection instance
 class ThreadingSimpleServer(socketserver.ThreadingMixIn, HTTPServer):
     pass
 
 class ServerRequestHandler(BaseHTTPRequestHandler):
+    # Not used, initally for testing
+    # Sends int response
     def do_GET(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
@@ -24,6 +27,7 @@ class ServerRequestHandler(BaseHTTPRequestHandler):
         self.send_response(202)
         self.end_headers()
 
+    # Sends an int response
     def do_POST(self):
         length = int(self.headers['Content-Length'])
         post_data = self.rfile.read(length)
@@ -37,6 +41,7 @@ def run(server_class=ThreadingSimpleServer, handler_class=ServerRequestHandler, 
     print('Starting http server on %s..' %port)
     httpd.serve_forever()
 
+# Runs the server on port 8080 by default unless otherwise specified
 if __name__ == "__main__":
     if len(argv) == 2:
         run(port=int(argv[1]))
