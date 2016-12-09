@@ -4,6 +4,9 @@ import threading
 import time
 from sensor import Event
 
+## Should hold a queue of Events that are sent to the server
+## File is deleted if response is bad news
+
 class eventQueueHandler:
     def __init__(self):
         eventQueue = queue.Queue()
